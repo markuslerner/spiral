@@ -2,19 +2,31 @@
 // https://threejsfundamentals.org/threejs/lessons/threejs-shadertoy.html
 // https://www.shadertoy.com/view/ldBGDc
 
-
-
 import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
 
 import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
 
+import SmoothFollow from './SmoothFollow.js';
 
-const params = {
-  speed: 0.0, // 0.1
-  exponent: 1.0,
-};
+
 
 function main() {
+  const params = {
+    speed: 0.0, // 0.1
+    scale: new SmoothFollow(100.0),
+    exponent: 1.0,
+  };
+
+  const gui = new GUI();
+
+  gui.add(params, 'speed', 0.0, 1.0);
+  gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
+  gui.add(params, 'exponent', 0.0, 5.0);
+
+  // var SmoothFollow();
+  console.log(params.scale.valueSmooth);
+
+
   const canvas = document.querySelector('#container');
   const renderer = new THREE.WebGLRenderer({canvas});
   renderer.autoClearColor = false;
@@ -36,12 +48,13 @@ function main() {
   uniform vec3 iResolution;
   uniform float iTime;
   uniform float exponent;
+  uniform float scale;
 
   float spiral(vec2 m) {
     float r = length(m);
     float a = atan(m.y, m.x);
     float rExp = pow(r, exponent);
-    float v = sin(100.0 * (rExp - 0.01 * a - iTime));
+    float v = sin(scale * (rExp - 1.0 / scale * a - iTime));
     return clamp(v, 0.0, 1.0);
   }
 
@@ -70,6 +83,7 @@ function main() {
   const uniforms = {
     iTime: { value: 0 },
     exponent: { value: params.exponent },
+    scale: { value: params.scale.valueSmooth },
     iResolution:  { value: new THREE.Vector3() },
   };
   const material = new THREE.ShaderMaterial({
@@ -77,11 +91,6 @@ function main() {
     uniforms,
   });
   scene.add(new THREE.Mesh(plane, material));
-
-  const gui = new GUI();
-
-  gui.add(params, 'speed', 0.0, 1.0);
-  gui.add(params, 'exponent', 0.0, 5.0);
 
   const clock = new THREE.Clock();
   let time = 0;
@@ -108,6 +117,7 @@ function main() {
     uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
     uniforms.iTime.value = time;
     uniforms.exponent.value = params.exponent;
+    uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
     renderer.render(scene, camera);
 
