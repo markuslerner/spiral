@@ -10,7 +10,8 @@ import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.m
 
 
 const params = {
-  speed: 0,
+  speed: 0.0, // 0.1
+  exponent: 1.0,
 };
 
 function main() {
@@ -34,11 +35,13 @@ function main() {
 
   uniform vec3 iResolution;
   uniform float iTime;
+  uniform float exponent;
 
   float spiral(vec2 m) {
     float r = length(m);
     float a = atan(m.y, m.x);
-    float v = sin(100.0 * (sqrt(r) - 0.01 * a - iTime));
+    float rExp = pow(r, exponent);
+    float v = sin(100.0 * (rExp - 0.01 * a - iTime));
     return clamp(v, 0.0, 1.0);
   }
 
@@ -66,6 +69,7 @@ function main() {
 
   const uniforms = {
     iTime: { value: 0 },
+    exponent: { value: params.exponent },
     iResolution:  { value: new THREE.Vector3() },
   };
   const material = new THREE.ShaderMaterial({
@@ -77,6 +81,7 @@ function main() {
   const gui = new GUI();
 
   gui.add(params, 'speed', 0.0, 1.0);
+  gui.add(params, 'exponent', 0.0, 5.0);
 
   const clock = new THREE.Clock();
   let time = 0;
@@ -102,6 +107,7 @@ function main() {
     const canvas = renderer.domElement;
     uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
     uniforms.iTime.value = time;
+    uniforms.exponent.value = params.exponent;
 
     renderer.render(scene, camera);
 
