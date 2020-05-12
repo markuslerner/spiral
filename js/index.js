@@ -13,19 +13,15 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(100.0),
-    exponent: 1.0,
+    scale: new SmoothFollow(500.0), // 100.0
+    exponent: new SmoothFollow(0.8), // 0.25
   };
 
   const gui = new GUI();
 
   gui.add(params, 'speed', 0.0, 1.0);
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
-  gui.add(params, 'exponent', 0.0, 5.0);
-
-  // var SmoothFollow();
-  console.log(params.scale.valueSmooth);
-
+  gui.add(params.exponent, 'value', 0.0, 5.0).name('exponent');
 
   const canvas = document.querySelector('#container');
   const renderer = new THREE.WebGLRenderer({canvas});
@@ -54,7 +50,8 @@ function main() {
     float r = length(m);
     float a = atan(m.y, m.x);
     float rExp = pow(r, exponent);
-    float v = sin(scale * (rExp - 1.0 / scale * a - iTime));
+    // float rExp = log(r); // this looks good, too!
+    float v = sin(scale * (rExp - (1.0 / scale) * a - iTime));
     return clamp(v, 0.0, 1.0);
   }
 
@@ -82,7 +79,7 @@ function main() {
 
   const uniforms = {
     iTime: { value: 0 },
-    exponent: { value: params.exponent },
+    exponent: { value: params.exponent.valueSmooth },
     scale: { value: params.scale.valueSmooth },
     iResolution:  { value: new THREE.Vector3() },
   };
@@ -116,7 +113,7 @@ function main() {
     const canvas = renderer.domElement;
     uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
     uniforms.iTime.value = time;
-    uniforms.exponent.value = params.exponent;
+    uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
     renderer.render(scene, camera);
