@@ -4,7 +4,7 @@
 
 import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
 
-import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
+import {GUI} from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
 
 import SmoothFollow from './SmoothFollow.js';
 
