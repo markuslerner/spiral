@@ -3,6 +3,12 @@
 // https://www.shadertoy.com/view/ldBGDc
 
 import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
+import {EffectComposer} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/EffectComposer.js';
+import {RenderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/RenderPass.js';
+import {ShaderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/ShaderPass.js';
+// import {UnrealBloomPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+import {HorizontalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/HorizontalBlurShader.js';
+import {VerticalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/VerticalBlurShader.js';
 
 import {GUI} from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
 
@@ -15,6 +21,11 @@ function main() {
     speed: 0.0, // 0.1
     scale: new SmoothFollow(500.0), // 100.0
     exponent: new SmoothFollow(0.8), // 0.25
+    // exposure: 1,
+		// bloomStrength: 1.0,
+		// bloomThreshold: 1.0,
+		// bloomRadius: 0.0,
+    blur: new SmoothFollow(0.0),
   };
 
   const gui = new GUI();
@@ -22,9 +33,23 @@ function main() {
   gui.add(params, 'speed', 0.0, 1.0);
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
   gui.add(params.exponent, 'value', 0.0, 5.0).name('exponent');
+  gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
+  // gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
+	// 	renderer.toneMappingExposure = Math.pow( value, 4.0 );
+	// } );
+	// gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+	// 	bloomPass.threshold = Number( value );
+	// } );
+	// gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
+	// 	bloomPass.strength = Number( value );
+	// } );
+	// gui.add( params, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
+	// 	bloomPass.radius = Number( value );
+	// } );
 
   const canvas = document.querySelector('#container');
   const renderer = new THREE.WebGLRenderer({canvas});
+  renderer.toneMapping = THREE.ReinhardToneMapping;
   renderer.autoClearColor = false;
 
   const camera = new THREE.OrthographicCamera(
@@ -92,6 +117,24 @@ function main() {
   const clock = new THREE.Clock();
   let time = 0;
 
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+
+  // resolution, strength, radius, threshold
+  // const bloomPass = new UnrealBloomPass(new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85);
+  // bloomPass.threshold = params.bloomThreshold;
+	// bloomPass.strength = params.bloomStrength;
+	// bloomPass.radius = params.bloomRadius;
+  // composer.addPass(bloomPass);
+
+  const hblur = new ShaderPass( HorizontalBlurShader );
+	composer.addPass( hblur );
+	const vblur = new ShaderPass( VerticalBlurShader );
+	vblur.renderToScreen = true;
+  composer.addPass( vblur );
+  hblur.uniforms.h.value = params.blur / window.innerWidth;
+  vblur.uniforms.v.value = params.blur / window.innerHeight;
+
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -108,7 +151,10 @@ function main() {
     var delta = clock.getDelta();
     time += delta * params.speed;
 
-    resizeRendererToDisplaySize(renderer);
+    if(resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      composer.setSize(canvas.width, canvas.height);
+    }
 
     const canvas = renderer.domElement;
     uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
@@ -116,7 +162,11 @@ function main() {
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
-    renderer.render(scene, camera);
+    hblur.uniforms.h.value = params.blur.loop(delta).valueSmooth / window.innerWidth;
+    vblur.uniforms.v.value = params.blur.loop(delta).valueSmooth / window.innerHeight;
+
+    // renderer.render(scene, camera);
+    composer.render(delta);
 
     requestAnimationFrame(render);
   }
