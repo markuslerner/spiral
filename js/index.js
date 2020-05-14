@@ -21,6 +21,9 @@ function main() {
     speed: 0.0, // 0.1
     scale: new SmoothFollow(500.0), // 100.0
     exponent: new SmoothFollow(0.8), // 0.25
+    color1: '#555',
+    color2: '#eebb00',
+    color3: '#ffeecc',
     // exposure: 1,
 		// bloomStrength: 1.0,
 		// bloomThreshold: 1.0,
@@ -34,6 +37,17 @@ function main() {
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
   gui.add(params.exponent, 'value', 0.0, 5.0).name('exponent');
   gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
+  gui.addColor(params, 'color1').onChange(function() {
+    uniforms.color1.value = new THREE.Color(params.color1);
+    // var hex = color.getHexString();
+    // var css = color.getStyle();
+	});
+  gui.addColor(params, 'color2').onChange(function() {
+    uniforms.color2.value = new THREE.Color(params.color2);
+	});
+  gui.addColor(params, 'color3').onChange(function() {
+    uniforms.color3.value = new THREE.Color(params.color3);
+	});
   // gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
 	// 	renderer.toneMappingExposure = Math.pow( value, 4.0 );
 	// } );
@@ -70,6 +84,9 @@ function main() {
   uniform float iTime;
   uniform float exponent;
   uniform float scale;
+  uniform vec3 color1;
+  uniform vec3 color2;
+  uniform vec3 color3;
 
   float spiral(vec2 m) {
     float r = length(m);
@@ -77,7 +94,7 @@ function main() {
     float rExp = pow(r, exponent);
     // float rExp = log(r); // this looks good, too!
     float v = sin(scale * (rExp - (1.0 / scale) * a - iTime));
-    return clamp(v, 0.0, 1.0);
+    return clamp(v, -1.0, 1.0);
   }
 
   void mainImage( out vec4 fragColor, in vec2 fragCoord )
@@ -92,9 +109,13 @@ function main() {
 
       float v = spiral(m-uv);
 
-      vec3 col = vec3(v);
+      // vec3 col = vec3(v);
+      // vec3 col = mix(color1, color2, v);
+      // vec3 col = v < 0.333 ? mix(color1, color2, smoothstep(0.0, 0.333, v)) : mix(color2, color3, smoothstep(0.333, 1.0, v));
+      vec3 col = v < 0.0 ? mix(color1, color2, smoothstep(-1.0, 0.0, v)) : mix(color2, color3, smoothstep(0.0, 1.0, v));
+      // vec3 col = v < 0.5 ? mix(color1, color2, smoothstep(0.0, 0.5, v)) : mix(color2, color3, smoothstep(0.5, 1.0, v));
 
-      fragColor = vec4(col,1.0);
+      fragColor = vec4(col, 1.0);
   }
 
   void main() {
@@ -106,6 +127,9 @@ function main() {
     iTime: { value: 0 },
     exponent: { value: params.exponent.valueSmooth },
     scale: { value: params.scale.valueSmooth },
+    color1: { type: 'vec3', value: new THREE.Color(params.color1) },
+    color2: { type: 'vec3', value: new THREE.Color(params.color2) },
+    color3: { type: 'vec3', value: new THREE.Color(params.color3) },
     iResolution:  { value: new THREE.Vector3() },
   };
   const material = new THREE.ShaderMaterial({
