@@ -19,11 +19,11 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(500.0), // 100.0
+    scale: new SmoothFollow(100.0), // 100.0
     exponent: new SmoothFollow(0.8), // 0.25
     color1: '#555',
-    color2: '#eebb00',
-    color3: '#ffeecc',
+    color2: '#eedd88',
+    color3: '#ffffaa',
     // exposure: 1,
 		// bloomStrength: 1.0,
 		// bloomThreshold: 1.0,
@@ -91,8 +91,8 @@ function main() {
   float spiral(vec2 m) {
     float r = length(m);
     float a = atan(m.y, m.x);
-    float rExp = pow(r, exponent);
-    // float rExp = log(r); // this looks good, too!
+    // float rExp = pow(r, exponent);
+    float rExp = log(r); // this looks good, too, with scale 20.0
     float v = sin(scale * (rExp - (1.0 / scale) * a - iTime));
     return clamp(v, -1.0, 1.0);
   }
