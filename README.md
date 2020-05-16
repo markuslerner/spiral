@@ -1,6 +1,6 @@
 # Spiral Shader Experiment
 
-Spiral shader experiment in [THREE.js](https://github.com/mrdoob/three.js/)
+JavaScript spiral fragment shader experiment in [THREE.js](https://github.com/mrdoob/three.js/)
 
 [Demo](https://www.markuslerner.com/github/spiral/index.html)
 
@@ -13,15 +13,15 @@ Spiral shader experiment in [THREE.js](https://github.com/mrdoob/three.js/)
 * ```warp``` – intensity of the warp based on an exponential easing function.
 * ```exponent``` – exponent to use for drawing the spiral.
 * ```sharpness``` – edge sharpness of the spiral spiral.
-* ```blur``` – postprocessing blur.
 * ```color*``` – colors of the spiral.
 
 
 ### Used libraries
 
-* [THREE.js](https://github.com/mrdoob/three.js/)
-* [dat.gui](https://github.com/dataarts/dat.gui)
-* [anime](https://github.com/juliangarnier/anime/)
+* [THREE.js](https://github.com/mrdoob/three.js/) – JavaScript 3D library
+* [stats.js](https://github.com/mrdoob/stats.js) – JavaScript Performance Monitor
+* [dat.gui](https://github.com/dataarts/dat.gui) – lightweight controller library
+* [anime](https://github.com/juliangarnier/anime/) – JavaScript animation engine
 
 
 ### Based on
