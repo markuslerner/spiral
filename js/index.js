@@ -20,10 +20,11 @@ function main() {
   const params = {
     speed: 0.0, // 0.1
     scale: new SmoothFollow(100.0), // 100.0
+    warp: new SmoothFollow(1.0), // 0.25
     exponent: new SmoothFollow(0.8), // 0.25
-    color1: '#555',
-    color2: '#eedd88',
-    color3: '#ffffaa',
+    color1: '#000',
+    color2: '#fff',
+    // color3: '#ffffaa',
     // exposure: 1,
 		// bloomStrength: 1.0,
 		// bloomThreshold: 1.0,
@@ -35,7 +36,8 @@ function main() {
 
   gui.add(params, 'speed', 0.0, 1.0);
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
-  gui.add(params.exponent, 'value', 0.0, 5.0).name('exponent');
+  gui.add(params.warp, 'value', 0.0, 1.0).name('warp');
+  gui.add(params.exponent, 'value', 0.0, 1.0).name('exponent');
   gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
   gui.addColor(params, 'color1').onChange(function() {
     uniforms.color1.value = new THREE.Color(params.color1);
@@ -45,9 +47,9 @@ function main() {
   gui.addColor(params, 'color2').onChange(function() {
     uniforms.color2.value = new THREE.Color(params.color2);
 	});
-  gui.addColor(params, 'color3').onChange(function() {
-    uniforms.color3.value = new THREE.Color(params.color3);
-	});
+  // gui.addColor(params, 'color3').onChange(function() {
+  //   uniforms.color3.value = new THREE.Color(params.color3);
+	// });
   // gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
 	// 	renderer.toneMappingExposure = Math.pow( value, 4.0 );
 	// } );
@@ -82,19 +84,30 @@ function main() {
 
   uniform vec3 iResolution;
   uniform float iTime;
+  uniform float warp;
   uniform float exponent;
   uniform float scale;
   uniform vec3 color1;
   uniform vec3 color2;
-  uniform vec3 color3;
+  // uniform vec3 color3;
+
+  float easeOutExp(float k) { // good
+    return k == 1.0 ? 1.0 : 1.0 - pow( 2.0, - 10.0 * k );
+  }
+
+  float ease(float k) {
+    return k == 1.0 ? 1.0 : 1.0 - pow( 2.0, - 10.0 * k );
+  }
 
   float spiral(vec2 m) {
     float r = length(m);
     float a = atan(m.y, m.x);
-    // float rExp = pow(r, exponent);
-    float rExp = log(r); // this looks good, too, with scale 20.0
+    float rExp = pow(r, exponent);
+    // float rExp = log(r); // this looks good, too, with scale 20.0
+    rExp = mix(rExp, ease(rExp), warp);
     float v = sin(scale * (rExp - (1.0 / scale) * a - iTime));
-    return clamp(v, -1.0, 1.0);
+    // return clamp(v, -1.0, 1.0);
+    return clamp(v, 0.0, 1.0);
   }
 
   void mainImage( out vec4 fragColor, in vec2 fragCoord )
@@ -110,9 +123,9 @@ function main() {
       float v = spiral(m-uv);
 
       // vec3 col = vec3(v);
-      // vec3 col = mix(color1, color2, v);
+      vec3 col = mix(color1, color2, v);
       // vec3 col = v < 0.333 ? mix(color1, color2, smoothstep(0.0, 0.333, v)) : mix(color2, color3, smoothstep(0.333, 1.0, v));
-      vec3 col = v < 0.0 ? mix(color1, color2, smoothstep(-1.0, 0.0, v)) : mix(color2, color3, smoothstep(0.0, 1.0, v));
+      // vec3 col = v < 0.0 ? mix(color1, color2, smoothstep(-1.0, 0.0, v)) : mix(color2, color3, smoothstep(0.0, 1.0, v));
       // vec3 col = v < 0.5 ? mix(color1, color2, smoothstep(0.0, 0.5, v)) : mix(color2, color3, smoothstep(0.5, 1.0, v));
 
       fragColor = vec4(col, 1.0);
@@ -125,11 +138,12 @@ function main() {
 
   const uniforms = {
     iTime: { value: 0 },
+    warp: { value: params.warp.valueSmooth },
     exponent: { value: params.exponent.valueSmooth },
     scale: { value: params.scale.valueSmooth },
     color1: { type: 'vec3', value: new THREE.Color(params.color1) },
     color2: { type: 'vec3', value: new THREE.Color(params.color2) },
-    color3: { type: 'vec3', value: new THREE.Color(params.color3) },
+    // color3: { type: 'vec3', value: new THREE.Color(params.color3) },
     iResolution:  { value: new THREE.Vector3() },
   };
   const material = new THREE.ShaderMaterial({
@@ -183,6 +197,7 @@ function main() {
     const canvas = renderer.domElement;
     uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
     uniforms.iTime.value = time;
+    uniforms.warp.value = params.warp.loop(delta).valueSmooth;
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
