@@ -3,12 +3,12 @@
 // https://www.shadertoy.com/view/ldBGDc
 
 import * as THREE from 'https://unpkg.com/three@0.116.1/build/three.module.js';
-import {EffectComposer} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/EffectComposer.js';
-import {RenderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/RenderPass.js';
-import {ShaderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/ShaderPass.js';
+// import {EffectComposer} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/EffectComposer.js';
+// import {RenderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/RenderPass.js';
+// import {ShaderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/ShaderPass.js';
 // import {UnrealBloomPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postprocessing/UnrealBloomPass.js';
-import {HorizontalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/HorizontalBlurShader.js';
-import {VerticalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/VerticalBlurShader.js';
+// import {HorizontalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/HorizontalBlurShader.js';
+// import {VerticalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/VerticalBlurShader.js';
 
 import Stats from 'https://unpkg.com/stats.js@0.17.0/src/Stats.js';
 
@@ -35,7 +35,7 @@ function main() {
 		// bloomStrength: 1.0,
 		// bloomThreshold: 1.0,
 		// bloomRadius: 0.0,
-    blur: new SmoothFollow(0.0),
+    // blur: new SmoothFollow(0.0),
   };
 
   const stats = new Stats();
@@ -55,7 +55,7 @@ function main() {
   gui.add(params.warp, 'value', 0.0, 1.0).name('warp');
   gui.add(params.exponent, 'value', 0.0, 1.0).name('exponent');
   gui.add(params.sharpness, 'value', 0.0, 1.0).name('sharpness');
-  gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
+  // gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
   gui.addColor(params, 'color1').onChange(function() {
     uniforms.color1.value = new THREE.Color(params.color1);
     // var hex = color.getHexString();
@@ -182,8 +182,8 @@ function main() {
   const clock = new THREE.Clock();
   let time = 0;
 
-  const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
+  // const composer = new EffectComposer(renderer);
+  // composer.addPass(new RenderPass(scene, camera));
 
   // resolution, strength, radius, threshold
   // const bloomPass = new UnrealBloomPass(new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85);
@@ -192,13 +192,13 @@ function main() {
 	// bloomPass.radius = params.bloomRadius;
   // composer.addPass(bloomPass);
 
-  const hblur = new ShaderPass( HorizontalBlurShader );
-	composer.addPass( hblur );
-	const vblur = new ShaderPass( VerticalBlurShader );
-	vblur.renderToScreen = true;
-  composer.addPass( vblur );
-  hblur.uniforms.h.value = params.blur / window.innerWidth;
-  vblur.uniforms.v.value = params.blur / window.innerHeight;
+  // const hblur = new ShaderPass( HorizontalBlurShader );
+	// composer.addPass( hblur );
+	// const vblur = new ShaderPass( VerticalBlurShader );
+	// vblur.renderToScreen = true;
+  // composer.addPass( vblur );
+  // hblur.uniforms.h.value = params.blur / window.innerWidth;
+  // vblur.uniforms.v.value = params.blur / window.innerHeight;
 
   const animeScale = anime({
     targets: params.scale,
@@ -229,22 +229,22 @@ function main() {
 
     if(resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
-      composer.setSize(canvas.width, canvas.height);
+      // composer.setSize(canvas.width, canvas.height);
     }
 
     const canvas = renderer.domElement;
-    uniforms.iResolution.value.set(canvas.width * window.devicePixelRatio, canvas.height * window.devicePixelRatio, 1);
+    uniforms.iResolution.value.set(canvas.clientWidth * window.devicePixelRatio, canvas.clientHeight * window.devicePixelRatio, 1);
     uniforms.iTime.value = time;
     uniforms.warp.value = params.warp.loop(delta).valueSmooth;
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
     uniforms.sharpness.value = params.sharpness.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
-    hblur.uniforms.h.value = params.blur.loop(delta).valueSmooth / window.innerWidth;
-    vblur.uniforms.v.value = params.blur.loop(delta).valueSmooth / window.innerHeight;
+    renderer.render(scene, camera);
 
-    // renderer.render(scene, camera);
-    composer.render(delta);
+    // hblur.uniforms.h.value = params.blur.loop(delta).valueSmooth / window.innerWidth;
+    // vblur.uniforms.v.value = params.blur.loop(delta).valueSmooth / window.innerHeight;
+    // composer.render(delta);
 
     stats.end();
 
