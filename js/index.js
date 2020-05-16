@@ -100,7 +100,7 @@ function main() {
   }
 
   float ease(float k) {
-    return k == 1.0 ? 1.0 : 1.0 - pow( 2.0, - 10.0 * k );
+    return easeOutExp(k);
   }
 
   float spiral(vec2 m) {
