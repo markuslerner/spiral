@@ -10,11 +10,13 @@ import {ShaderPass} from 'https://unpkg.com/three@0.116.1/examples/jsm/postproce
 import {HorizontalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/HorizontalBlurShader.js';
 import {VerticalBlurShader} from 'https://unpkg.com/three@0.116.1/examples/jsm/shaders/VerticalBlurShader.js';
 
+import Stats from 'https://unpkg.com/stats.js@0.17.0/src/Stats.js';
+
 import {GUI} from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
 
-import SmoothFollow from './SmoothFollow.js';
-
 import anime from 'https://unpkg.com/animejs@3.2.0/lib/anime.es.js';
+
+import SmoothFollow from './SmoothFollow.js';
 
 
 
@@ -35,6 +37,9 @@ function main() {
 		// bloomRadius: 0.0,
     blur: new SmoothFollow(0.0),
   };
+
+  const stats = new Stats();
+  document.body.appendChild( stats.dom );
 
   const gui = new GUI();
 
@@ -216,6 +221,8 @@ function main() {
   }
 
   function render() { // time
+    stats.begin();
+
     // time *= 0.001;  // convert to seconds
     var delta = clock.getDelta();
     time += delta * params.speed;
@@ -238,6 +245,8 @@ function main() {
 
     // renderer.render(scene, camera);
     composer.render(delta);
+
+    stats.end();
 
     requestAnimationFrame(render);
   }
