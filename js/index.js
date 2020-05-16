@@ -19,9 +19,9 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(100.0), // 100.0
+    scale: new SmoothFollow(250.0), // 100.0
     warp: new SmoothFollow(1.0), // 0.25
-    exponent: new SmoothFollow(0.8), // 0.25
+    exponent: new SmoothFollow(1.0), // 0.25
     color1: '#000',
     color2: '#fff',
     // color3: '#ffffaa',
@@ -65,8 +65,9 @@ function main() {
 
   const canvas = document.querySelector('#container');
   const renderer = new THREE.WebGLRenderer({canvas});
-  renderer.toneMapping = THREE.ReinhardToneMapping;
+  // renderer.toneMapping = THREE.ReinhardToneMapping;
   renderer.autoClearColor = false;
+  renderer.setPixelRatio(window.devicePixelRatio);
 
   const camera = new THREE.OrthographicCamera(
     -1, // left
@@ -106,7 +107,16 @@ function main() {
     // float rExp = log(r); // this looks good, too, with scale 20.0
     rExp = mix(rExp, ease(rExp), warp);
     float v = sin(scale * (rExp - (1.0 / scale) * a - iTime));
-    // return clamp(v, -1.0, 1.0);
+
+    // controlling the sharpness of the edge:
+    // float range = (1.0 - r) * 1.0;
+    // float range = mix(0.0, 1.0, 1.0 - rExp);
+    // float range = rExp * 0.5; // mix(0.0, 1.0, 1.0 - rExp);
+    // float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
+
+    float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
+
+    v = smoothstep(0.5 - range, 0.5 + range, v);
     return clamp(v, 0.0, 1.0);
   }
 
@@ -195,7 +205,7 @@ function main() {
     }
 
     const canvas = renderer.domElement;
-    uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+    uniforms.iResolution.value.set(canvas.width * window.devicePixelRatio, canvas.height * window.devicePixelRatio, 1);
     uniforms.iTime.value = time;
     uniforms.warp.value = params.warp.loop(delta).valueSmooth;
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
