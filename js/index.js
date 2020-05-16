@@ -21,7 +21,8 @@ function main() {
     speed: 0.0, // 0.1
     scale: new SmoothFollow(250.0), // 100.0
     warp: new SmoothFollow(1.0), // 0.25
-    exponent: new SmoothFollow(1.0), // 0.25
+    exponent: new SmoothFollow(0.9), // 0.25
+    sharpness: new SmoothFollow(0.0), // 0.25
     color1: '#000',
     color2: '#fff',
     // color3: '#ffffaa',
@@ -38,6 +39,7 @@ function main() {
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
   gui.add(params.warp, 'value', 0.0, 1.0).name('warp');
   gui.add(params.exponent, 'value', 0.0, 1.0).name('exponent');
+  gui.add(params.sharpness, 'value', 0.0, 1.0).name('sharpness');
   gui.add(params.blur, 'value', 0.0, 5.0).name('blur');
   gui.addColor(params, 'color1').onChange(function() {
     uniforms.color1.value = new THREE.Color(params.color1);
@@ -87,6 +89,7 @@ function main() {
   uniform float iTime;
   uniform float warp;
   uniform float exponent;
+  uniform float sharpness;
   uniform float scale;
   uniform vec3 color1;
   uniform vec3 color2;
@@ -112,10 +115,8 @@ function main() {
     // float range = (1.0 - r) * 1.0;
     // float range = mix(0.0, 1.0, 1.0 - rExp);
     // float range = rExp * 0.5; // mix(0.0, 1.0, 1.0 - rExp);
-    // float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
-
     float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
-
+    range = mix(range, 0.0, sharpness);
     v = smoothstep(0.5 - range, 0.5 + range, v);
     return clamp(v, 0.0, 1.0);
   }
@@ -150,6 +151,7 @@ function main() {
     iTime: { value: 0 },
     warp: { value: params.warp.valueSmooth },
     exponent: { value: params.exponent.valueSmooth },
+    sharpness: { value: params.sharpness.valueSmooth },
     scale: { value: params.scale.valueSmooth },
     color1: { type: 'vec3', value: new THREE.Color(params.color1) },
     color2: { type: 'vec3', value: new THREE.Color(params.color2) },
@@ -209,6 +211,7 @@ function main() {
     uniforms.iTime.value = time;
     uniforms.warp.value = params.warp.loop(delta).valueSmooth;
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
+    uniforms.sharpness.value = params.sharpness.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
 
     hblur.uniforms.h.value = params.blur.loop(delta).valueSmooth / window.innerWidth;
