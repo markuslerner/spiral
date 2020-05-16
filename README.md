@@ -17,6 +17,13 @@ Spiral shader experiment in [THREE.js](https://github.com/mrdoob/three.js/)
 * ```color*``` – colors of the spiral.
 
 
+### Used libraries
+
+* [THREE.js](https://github.com/mrdoob/three.js/)
+* [dat.gui](https://github.com/dataarts/dat.gui)
+* [anime](https://github.com/juliangarnier/anime/)
+
+
 ### Based on
 
 * https://threejsfundamentals.org/threejs/lessons/threejs-shadertoy.html

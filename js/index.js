@@ -14,12 +14,15 @@ import {GUI} from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
 
 import SmoothFollow from './SmoothFollow.js';
 
+import anime from 'https://unpkg.com/animejs@3.2.0/lib/anime.es.js';
+
 
 
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(250.0), // 100.0
+    scale: new SmoothFollow(0.0), // 100.0
+    animateScale: true,
     warp: new SmoothFollow(1.0), // 0.25
     exponent: new SmoothFollow(0.9), // 0.25
     sharpness: new SmoothFollow(0.0), // 0.25
@@ -36,7 +39,14 @@ function main() {
   const gui = new GUI();
 
   gui.add(params, 'speed', 0.0, 1.0);
-  gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
+  gui.add(params.scale, 'value', 0.0, 1000.0).name('scale').listen();
+  gui.add(params, 'animateScale').name('animate scale').onChange(function() {
+    if(animeScale.paused) {
+      animeScale.play();
+    } else {
+      animeScale.pause();
+    }
+  });
   gui.add(params.warp, 'value', 0.0, 1.0).name('warp');
   gui.add(params.exponent, 'value', 0.0, 1.0).name('exponent');
   gui.add(params.sharpness, 'value', 0.0, 1.0).name('sharpness');
@@ -105,7 +115,7 @@ function main() {
 
   float spiral(vec2 m) {
     float r = length(m);
-    float a = atan(m.y, m.x);
+    float a = atan(m.y, -m.x);
     float rExp = pow(r, exponent);
     // float rExp = log(r); // this looks good, too, with scale 20.0
     rExp = mix(rExp, ease(rExp), warp);
@@ -184,6 +194,15 @@ function main() {
   composer.addPass( vblur );
   hblur.uniforms.h.value = params.blur / window.innerWidth;
   vblur.uniforms.v.value = params.blur / window.innerHeight;
+
+  const animeScale = anime({
+    targets: params.scale,
+    value: 250,
+    direction: 'alternate',
+    duration: 10000,
+    loop: true,
+    easing: 'easeInOutQuart',
+  });
 
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
