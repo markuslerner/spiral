@@ -204,7 +204,7 @@ function main() {
     targets: params.scale,
     value: 250,
     direction: 'alternate',
-    duration: 10000,
+    duration: 7500,
     loop: true,
     easing: 'easeInOutQuart',
   });
