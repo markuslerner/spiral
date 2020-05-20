@@ -23,11 +23,11 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(0.0), // 100.0
-    animateScale: true,
-    warp: new SmoothFollow(1.0), // 0.25
-    exponent: new SmoothFollow(0.9), // 0.25
-    sharpness: new SmoothFollow(0.0), // 0.25
+    scale: new SmoothFollow(0.0), // 0.0
+    animateScale: true, // true
+    warp: new SmoothFollow(1.0), // 1.0
+    exponent: new SmoothFollow(0.9), // 0.9
+    sharpness: new SmoothFollow(0.0), // 0.0
     color1: '#000',
     color2: '#fff',
     // color3: '#ffffaa',
@@ -155,6 +155,7 @@ function main() {
 
       // vec3 col = vec3(v);
       vec3 col = mix(color1, color2, v);
+
       // vec3 col = v < 0.333 ? mix(color1, color2, smoothstep(0.0, 0.333, v)) : mix(color2, color3, smoothstep(0.333, 1.0, v));
       // vec3 col = v < 0.0 ? mix(color1, color2, smoothstep(-1.0, 0.0, v)) : mix(color2, color3, smoothstep(0.0, 1.0, v));
       // vec3 col = v < 0.5 ? mix(color1, color2, smoothstep(0.0, 0.5, v)) : mix(color2, color3, smoothstep(0.5, 1.0, v));
@@ -212,6 +213,7 @@ function main() {
     duration: 7500,
     loop: true,
     easing: 'easeInOutQuart',
+    autoplay: params.animateScale,
   });
 
   function resizeRendererToDisplaySize(renderer) {
