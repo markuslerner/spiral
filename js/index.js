@@ -23,13 +23,14 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(100.0), // 0.0
-    animateScale: false, // true
+    scale: new SmoothFollow(0.001), // 0.0
+    animateScale: true, // true
     warp: new SmoothFollow(1.0), // 1.0
-    exponent: new SmoothFollow(0.9), // 0.9
+    exponent: new SmoothFollow(0.5), // 0.9
     sharpness: new SmoothFollow(0.0), // 0.0
     color1: '#000',
     color2: '#fff',
+    colorOffset: new SmoothFollow(1.0),
     // color3: '#ffffaa',
     // exposure: 1,
 		// bloomStrength: 1.0,
@@ -49,7 +50,7 @@ function main() {
   gui.close();
 
   gui.add(params, 'speed', 0.0, 1.0);
-  gui.add(params.scale, 'value', 0.0, 1000.0).name('scale').listen();
+  const scaleController = gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
   gui.add(params, 'animateScale').name('animate scale').onChange(function() {
     if(animeScale.paused) {
       animeScale.play();
@@ -69,6 +70,7 @@ function main() {
   gui.addColor(params, 'color2').onChange(function() {
     uniforms.color2.value = new THREE.Color(params.color2);
 	});
+  gui.add(params.colorOffset, 'value', 0.0, 3.0).name('color offset');
   // gui.addColor(params, 'color3').onChange(function() {
   //   uniforms.color3.value = new THREE.Color(params.color3);
 	// });
@@ -113,6 +115,7 @@ function main() {
   uniform float scale;
   uniform vec3 color1;
   uniform vec3 color2;
+  uniform float colorOffset;
   // uniform vec3 color3;
 
   float easeOutExp(float k) { // good
@@ -126,6 +129,7 @@ function main() {
   float spiral(vec2 m, float s) {
     float r = length(m);
     float a = atan(m.y, -m.x);
+    a -= s * r;
     float rExp = pow(r, exponent);
     // float rExp = log(r); // this looks good, too, with scale 20.0
     rExp = mix(rExp, ease(rExp), warp);
@@ -136,7 +140,7 @@ function main() {
     // float range = mix(0.0, 1.0, 1.0 - rExp);
     // float range = rExp * 0.5; // mix(0.0, 1.0, 1.0 - rExp);
     float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
-    range = mix(range * s, 0.0, sharpness);
+    range = mix(range, 0.0, sharpness);
     v = smoothstep(0.5 - range, 0.5 + range, v);
     return clamp(v, 0.0, 1.0);
   }
@@ -161,9 +165,13 @@ function main() {
       // vec3 col = v < 0.5 ? mix(color1, color2, smoothstep(0.0, 0.5, v)) : mix(color2, color3, smoothstep(0.5, 1.0, v));
 
       vec3 col = vec3(0.0);
-      col.r = spiral(m-uv, 0.0);
-      col.g = spiral(m-uv, 2.0);
-      col.b = spiral(m-uv, 4.0);
+      // col.r = spiral(m-uv, 0.0);
+      // col.g = spiral(m-uv, colorOffset * 1.0);
+      // col.b = spiral(m-uv, colorOffset * 2.0);
+
+      col.r = mix(color1.r, color2.r, spiral(m-uv, 0.0));
+      col.g = mix(color1.g, color2.g, spiral(m-uv, colorOffset * 1.0));
+      col.b = mix(color1.b, color2.b, spiral(m-uv, colorOffset * 2.0));
 
       fragColor = vec4(col, 1.0);
   }
@@ -181,6 +189,7 @@ function main() {
     scale: { value: params.scale.valueSmooth },
     color1: { type: 'vec3', value: new THREE.Color(params.color1) },
     color2: { type: 'vec3', value: new THREE.Color(params.color2) },
+    colorOffset: { value: params.colorOffset.valueSmooth },
     // color3: { type: 'vec3', value: new THREE.Color(params.color3) },
     iResolution:  { value: new THREE.Vector3() },
   };
@@ -213,12 +222,15 @@ function main() {
 
   const animeScale = anime({
     targets: params.scale,
-    value: 250,
+    value: 22.0,
     direction: 'alternate',
     duration: 7500,
     loop: true,
     easing: 'easeInOutQuart',
     autoplay: params.animateScale,
+    update: () => {
+      scaleController.updateDisplay();
+    },
   });
 
   function resizeRendererToDisplaySize(renderer) {
@@ -251,6 +263,7 @@ function main() {
     uniforms.exponent.value = params.exponent.loop(delta).valueSmooth;
     uniforms.sharpness.value = params.sharpness.loop(delta).valueSmooth;
     uniforms.scale.value = params.scale.loop(delta).valueSmooth;
+    uniforms.colorOffset.value = params.colorOffset.loop(delta).valueSmooth;
 
     renderer.render(scene, camera);
 
