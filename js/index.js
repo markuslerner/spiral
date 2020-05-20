@@ -49,7 +49,7 @@ function main() {
   gui.close();
 
   gui.add(params, 'speed', 0.0, 1.0);
-  gui.add(params.scale, 'value', 0.0, 1000.0).name('scale').listen();
+  const scaleController = gui.add(params.scale, 'value', 0.0, 1000.0).name('scale');
   gui.add(params, 'animateScale').name('animate scale').onChange(function() {
     if(animeScale.paused) {
       animeScale.play();
@@ -214,6 +214,9 @@ function main() {
     loop: true,
     easing: 'easeInOutQuart',
     autoplay: params.animateScale,
+    update: () => {
+      scaleController.updateDisplay();
+    },
   });
 
   function resizeRendererToDisplaySize(renderer) {
