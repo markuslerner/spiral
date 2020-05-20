@@ -23,8 +23,8 @@ import SmoothFollow from './SmoothFollow.js';
 function main() {
   const params = {
     speed: 0.0, // 0.1
-    scale: new SmoothFollow(0.0), // 0.0
-    animateScale: true, // true
+    scale: new SmoothFollow(100.0), // 0.0
+    animateScale: false, // true
     warp: new SmoothFollow(1.0), // 1.0
     exponent: new SmoothFollow(0.9), // 0.9
     sharpness: new SmoothFollow(0.0), // 0.0
@@ -123,7 +123,7 @@ function main() {
     return easeOutExp(k);
   }
 
-  float spiral(vec2 m) {
+  float spiral(vec2 m, float s) {
     float r = length(m);
     float a = atan(m.y, -m.x);
     float rExp = pow(r, exponent);
@@ -136,7 +136,7 @@ function main() {
     // float range = mix(0.0, 1.0, 1.0 - rExp);
     // float range = rExp * 0.5; // mix(0.0, 1.0, 1.0 - rExp);
     float range = mix(rExp, 1.0, 1.0 - rExp) * 0.5; // awesome!
-    range = mix(range, 0.0, sharpness);
+    range = mix(range * s, 0.0, sharpness);
     v = smoothstep(0.5 - range, 0.5 + range, v);
     return clamp(v, 0.0, 1.0);
   }
@@ -151,14 +151,19 @@ function main() {
 
       vec2 m = vec2(0.5, 0.5);
 
-      float v = spiral(m-uv);
+      // float v = spiral(m-uv);
 
       // vec3 col = vec3(v);
-      vec3 col = mix(color1, color2, v);
+      // vec3 col = mix(color1, color2, v);
 
       // vec3 col = v < 0.333 ? mix(color1, color2, smoothstep(0.0, 0.333, v)) : mix(color2, color3, smoothstep(0.333, 1.0, v));
       // vec3 col = v < 0.0 ? mix(color1, color2, smoothstep(-1.0, 0.0, v)) : mix(color2, color3, smoothstep(0.0, 1.0, v));
       // vec3 col = v < 0.5 ? mix(color1, color2, smoothstep(0.0, 0.5, v)) : mix(color2, color3, smoothstep(0.5, 1.0, v));
+
+      vec3 col = vec3(0.0);
+      col.r = spiral(m-uv, 0.0);
+      col.g = spiral(m-uv, 2.0);
+      col.b = spiral(m-uv, 4.0);
 
       fragColor = vec4(col, 1.0);
   }
