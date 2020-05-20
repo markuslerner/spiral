@@ -40,8 +40,13 @@ function main() {
 
   const stats = new Stats();
   document.body.appendChild( stats.dom );
+  stats.dom.style.left = 'auto';
+  stats.dom.style.right = '0px';
+  stats.dom.style.top = 'auto';
+  stats.dom.style.bottom = '0px';
 
   const gui = new GUI();
+  gui.close();
 
   gui.add(params, 'speed', 0.0, 1.0);
   gui.add(params.scale, 'value', 0.0, 1000.0).name('scale').listen();

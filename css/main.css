@@ -41,7 +41,7 @@ h1 {
 
 #title {
   position: absolute;
-  left: 110px;
+  left: 40px;
   top: 25px;
 }
 
@@ -49,8 +49,8 @@ h1 {
 #info {
   z-index: 1;
   position: absolute;
-  left: 110px;
-  bottom: 40px;
+  left: 40px;
+  bottom: 30px;
 }
 
 a {
