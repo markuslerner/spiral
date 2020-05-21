@@ -222,7 +222,7 @@ function main() {
 
   const animeScale = anime({
     targets: params.scale,
-    value: 22.0,
+    value: 44.0,
     direction: 'alternate',
     duration: 7500,
     loop: true,
