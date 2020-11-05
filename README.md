@@ -2,7 +2,7 @@
 
 JavaScript spiral fragment shader experiment in [THREE.js](https://github.com/mrdoob/three.js/)
 
-[Demo](https://www.markuslerner.com/github/spiral/index.html) (Photosensitive epilepsy warning)
+[Demo](https://dev.markuslerner.com/spiral/index.html) (Photosensitive epilepsy warning)
 
 
 ### Variables
